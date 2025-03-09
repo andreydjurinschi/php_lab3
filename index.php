@@ -29,7 +29,7 @@ function FindByDescription(array $transactions, string $desc = '') : array{
     return $result;
 }
 
-function FindById(int $id, $transactions) : void {
+function FindById(int $id, $transactions) : array {
     $result = [];
     foreach ($transactions as $transaction) {
         if($transaction['id'] == $id){
@@ -40,6 +40,14 @@ function FindById(int $id, $transactions) : void {
     if(empty($result)){
         echo "No transaction found";
     }
+    return $result;
+}
+
+function DaySinceTransaction(string $date) : int{
+    $date = new DateTime($date);
+    $now = new DateTime();
+    $interval = $now->diff($date);
+    return $interval->days;
 }
 ?>
 
@@ -62,6 +70,7 @@ function FindById(int $id, $transactions) : void {
                 <th>Amount</th>
                 <th>Description</th>
                 <th>Merchant</th>
+                <th>Day Since Transaction</th>
             </tr>
         </thead>
         <tbody>
@@ -72,6 +81,7 @@ function FindById(int $id, $transactions) : void {
                     <td><?php echo $transaction['amount']; ?></td>
                     <td><?php echo $transaction['description']; ?></td>
                     <td><?php echo $transaction['merchant']; ?></td>
+                    <td><?php echo DaySinceTransaction($transaction['date'])?></td>
                 </tr>
                 <?php endforeach;?>
         </tbody>
@@ -83,7 +93,7 @@ function FindById(int $id, $transactions) : void {
                 <td colspan="3">
                 <form method="POST">
                     <h5>Find by Description</h5>
-                    <p>Desciption: <input type="text" name="description" /></p>
+                    <p>Desciption: <input type="text" name="description" value="<?= isset($_POST['description']) ? htmlspecialchars($_POST['description']) : '' ?>"/></p>
                     <input type="submit" value="Find by description" />
                 </form>
                 </td>
@@ -103,17 +113,24 @@ function FindById(int $id, $transactions) : void {
                     <td colspan="3">
                         <form method="POST">
                             <h5>Find by ID</h5>
-                            <p>ID: <input type="text" name="id" /></p>
+                            <p>ID: <input type="text" name="id" value="<?= isset($_POST['id']) ? htmlspecialchars($_POST['id']) : '' ?>" /></p>
                             <input type="submit" value="Find by ID" />
                         </form>
                     </td>
                     <td colspan="2">
                     <?php 
-                    if(isset($_POST['id'])){
+                    if(isset($_POST['id'])):
                         $id = (int)$_POST['id'];
-                        FindById($id, $transactions);
-                    }
-                    ?>
+                        $transaction = FindById($id, $transactions);?>
+                        <p id="color">Days since transaction: 
+                        <?php 
+                        if(empty($transaction)){
+                            echo " ";   
+                        }else{
+                            echo " " . DaySinceTransaction($transaction['date']);
+                        }?></p>
+                    <?php endif; ?>
+                    </td>
                 </tr>
             </tr>
         </tfoot>

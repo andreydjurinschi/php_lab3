@@ -23,3 +23,8 @@ tr:nth-child(even) {
 tr:hover {
     background-color: #e0e0e0;
 }
+
+#color{
+    font-weight: bold;
+    color: seagreen;
+}
