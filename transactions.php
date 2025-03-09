@@ -63,7 +63,8 @@ $transactions = [
         "amount" => 60.00,
         "description" => "Movie night",
         "merchant" => "Cinema City",
-    ],    [
+    ],    
+    [
         "id" => 10,
         "date" => "2024-02-20",
         "amount" => 60.00,

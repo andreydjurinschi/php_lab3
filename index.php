@@ -2,9 +2,16 @@
 declare(strict_types=1);
 require 'transactions.php';
 
-$desc = $_POST['description'] ?? ' ';
 
-function CalculateTotalAmount(array $transactions) : float{
+
+/**
+ * Calculate the total amount of all transactions
+ *
+ * @return float
+ */
+
+function CalculateTotalAmount() : float{
+    global $transactions;
     $sum = 0;
     foreach ($transactions as $transaction) {
         $sum += $transaction['amount'];
@@ -12,7 +19,15 @@ function CalculateTotalAmount(array $transactions) : float{
     return $sum;
 }
 
-function FindByDescription(array $transactions, string $desc = '') : array{
+/**
+ * Find transactions by description
+ *
+ * @param string $desc
+ * @return array
+ */
+
+function FindByDescription(string $desc) : array{
+    global $transactions;
     $desc = trim($desc);
     if(isset($_POST['description'])){
         $desc = htmlspecialchars($_POST['description']);
@@ -29,7 +44,14 @@ function FindByDescription(array $transactions, string $desc = '') : array{
     return $result;
 }
 
-function FindById(int $id, $transactions) : array {
+/**
+ * Find transaction by ID
+ *
+ * @param int $id
+ * @return array
+ */
+function FindById(int $id) : array {
+    global $transactions;
     $result = [];
     foreach ($transactions as $transaction) {
         if($transaction['id'] == $id){
@@ -43,13 +65,45 @@ function FindById(int $id, $transactions) : array {
     return $result;
 }
 
+/**
+ * Calculate the number of days since a transaction
+ *
+ * @param string $date
+ * @return int
+ */
 function DaySinceTransaction(string $date) : int{
     $date = new DateTime($date);
     $now = new DateTime();
     $interval = $now->diff($date);
     return $interval->days;
 }
+
+/**
+ * Add a new transaction
+ *
+ * @param int $id
+ * @param string $date
+ * @param float $amount
+ * @param string $description
+ * @param string $merchant
+ */
+function addTransaction(int $id, string $date, float $amount, string $description, string $merchant) : void {
+    global $transactions;
+
+    $transaction = [
+        'id' => $id,
+        'date' => $date,
+        'amount' => $amount,
+        'description' => $description,
+        'merchant' => $merchant
+    ];
+
+    $transactions[] = $transaction;
+}
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -74,7 +128,8 @@ function DaySinceTransaction(string $date) : int{
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($transactions as $transaction): ?>
+            <?php 
+            foreach ($transactions as $transaction): ?>
                 <tr>
                     <td><?php echo $transaction['id']; ?></td>
                     <td><?php echo $transaction['date']; ?></td>
@@ -87,7 +142,7 @@ function DaySinceTransaction(string $date) : int{
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="2">Total amount: <?=CalculateTotalAmount($transactions);?></td>
+                <td colspan="2">Total amount: <?=CalculateTotalAmount();?></td>
             </tr>
             <tr>
                 <td colspan="3">
@@ -97,9 +152,10 @@ function DaySinceTransaction(string $date) : int{
                     <input type="submit" value="Find by description" />
                 </form>
                 </td>
-                <td colspan="2">
+                <td colspan="3">
                     <?php 
-                    $filtered = FindByDescription($transactions);
+                    $desc = $_POST['description'] ?? ' ';
+                    $filtered = FindByDescription($desc);
                     if (count($filtered) > 0):
                         foreach($filtered as $transaction): ?>
                             <p><?php echo "ID: " . $transaction['id'] . " | date: " . $transaction['date'] . " | amount: " . $transaction['amount'] . " | description: " . $transaction['description'] . " | merchant: " . $transaction['merchant']; ?></p>
@@ -113,15 +169,15 @@ function DaySinceTransaction(string $date) : int{
                     <td colspan="3">
                         <form method="POST">
                             <h5>Find by ID</h5>
-                            <p>ID: <input type="text" name="id" value="<?= isset($_POST['id']) ? htmlspecialchars($_POST['id']) : '' ?>" /></p>
+                            <p>ID: <input type="text" name="FindById" value="<?= isset($_POST['FindById']) ? htmlspecialchars($_POST['FindById']) : '' ?>" /></p>
                             <input type="submit" value="Find by ID" />
                         </form>
                     </td>
-                    <td colspan="2">
+                    <td colspan="3">
                     <?php 
-                    if(isset($_POST['id'])):
-                        $id = (int)$_POST['id'];
-                        $transaction = FindById($id, $transactions);?>
+                    if(isset($_POST['FindById'])):
+                        $id = (int)$_POST['FindById'];
+                        $transaction = FindById($id);?>
                         <p id="color">Days since transaction: 
                         <?php 
                         if(empty($transaction)){
@@ -135,6 +191,26 @@ function DaySinceTransaction(string $date) : int{
             </tr>
         </tfoot>
     </table>
+<form method="post">
+    <h5>Add new transaction</h5>
+    <p>ID: <input type="text" name="id" value="<?php echo count($transactions) + 1?>" readonly/></p>
+    <p>Date: <input type="date" name="date" value="<?php echo isset($_POST['date']) ? htmlspecialchars($_POST['date']) : ' '?>"/></p>
+    <p>Amount: <input type="number" name="amount" step="0.05" value="<?php echo isset($_POST['amount']) ? htmlspecialchars($_POST['amount']) : ' ' ?>"/></p>
+    <p>Description: <input type="text" name="desc" value="<?php echo isset($_POST['desc']) ? htmlspecialchars($_POST['desc']) : ' ' ?>"/></p>
+    <p>Merchant: <input type="text" name="merchant" value="<?php echo isset($_POST['merchant']) ? htmlspecialchars($_POST['merchant']) : ' ' ?>"/></p>
+    <input type="submit" value="Add transaction" />
+</form>
+
+    <?php 
+        if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['date'], $_POST['amount'], $_POST['desc'], $_POST['merchant'])){
+            $id = (int)$_POST['id'];
+            $date = $_POST['date'];
+            $amount = (float)$_POST['amount'];
+            $desc = $_POST['desc'];
+            $merchant = $_POST['merchant'];
+            addTransaction($id, $date, $amount, $desc, $merchant);
+        }
+    ?>
 </body>
 </html>
 
