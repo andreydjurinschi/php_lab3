@@ -100,6 +100,9 @@ function addTransaction(int $id, string $date, float $amount, string $descriptio
 
     $transactions[] = $transaction;
 }
+addTransaction(11, '2020-01-01', 100, 'Salary', 'Employer');
+addTransaction(12, '2020-01-02', 50, 'Food', 'Restaurant');
+addTransaction(13, '2020-01-03', 30, 'Transport', 'Bus');
 ?>
 
 
@@ -193,7 +196,7 @@ function addTransaction(int $id, string $date, float $amount, string $descriptio
     </table>
 <form method="post">
     <h5>Add new transaction</h5>
-    <p>ID: <input type="text" name="id" value="<?php echo count($transactions) + 1?>" readonly/></p>
+    <p>ID: <input type="text" name="id" value="<?php echo count($transactions) + 1 ?>" readonly/></p>
     <p>Date: <input type="date" name="date" value="<?php echo isset($_POST['date']) ? htmlspecialchars($_POST['date']) : ' '?>"/></p>
     <p>Amount: <input type="number" name="amount" step="0.05" value="<?php echo isset($_POST['amount']) ? htmlspecialchars($_POST['amount']) : ' ' ?>"/></p>
     <p>Description: <input type="text" name="desc" value="<?php echo isset($_POST['desc']) ? htmlspecialchars($_POST['desc']) : ' ' ?>"/></p>
@@ -202,7 +205,7 @@ function addTransaction(int $id, string $date, float $amount, string $descriptio
 </form>
 
     <?php 
-        if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['date'], $_POST['amount'], $_POST['desc'], $_POST['merchant'])){
+        if(isset($_POST['id'], $_POST['date'], $_POST['amount'], $_POST['desc'], $_POST['merchant'])){
             $id = (int)$_POST['id'];
             $date = $_POST['date'];
             $amount = (float)$_POST['amount'];
@@ -210,7 +213,9 @@ function addTransaction(int $id, string $date, float $amount, string $descriptio
             $merchant = $_POST['merchant'];
             addTransaction($id, $date, $amount, $desc, $merchant);
         }
+
     ?>
+    <a href="images.php">go to file</a>
 </body>
 </html>
 
