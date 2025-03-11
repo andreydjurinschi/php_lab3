@@ -29,9 +29,6 @@ function CalculateTotalAmount() : float{
 function FindByDescription(string $desc) : array{
     global $transactions;
     $desc = trim($desc);
-    if(isset($_POST['description'])){
-        $desc = htmlspecialchars($_POST['description']);
-    }
     if(empty($desc)){
         return [];
     }   
@@ -41,7 +38,7 @@ function FindByDescription(string $desc) : array{
             $result[$i] = $transactions[$i];
         }
     }
-    return $result;
+    return array_values($result); // reindex the array
 }
 
 /**
@@ -100,9 +97,9 @@ function addTransaction(int $id, string $date, float $amount, string $descriptio
 
     $transactions[] = $transaction;
 }
-addTransaction(11, '2020-01-01', 100, 'Salary', 'Employer');
-addTransaction(12, '2020-01-02', 50, 'Food', 'Restaurant');
-addTransaction(13, '2020-01-03', 30, 'Transport', 'Bus');
+addTransaction(11, '2020-01-01', 1050, 'Salary', 'Employer');
+addTransaction(12, '2020-01-02', 41, 'Food', 'Restaurant');
+addTransaction(13, '2020-01-03', 3, 'Transport', 'Bus');
 ?>
 
 
@@ -114,11 +111,10 @@ addTransaction(13, '2020-01-03', 30, 'Transport', 'Bus');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css"> 
-    <title>Document</title>
+    <title>Lab 3</title>
 </head>
 <body>
-    <h4>All transactions
-    </h4>
+    <h4>All transactions</h4>
     <table>
         <thead>
             <tr>
@@ -151,7 +147,7 @@ addTransaction(13, '2020-01-03', 30, 'Transport', 'Bus');
                 <td colspan="3">
                 <form method="POST">
                     <h5>Find by Description</h5>
-                    <p>Desciption: <input type="text" name="description" value="<?= isset($_POST['description']) ? htmlspecialchars($_POST['description']) : '' ?>"/></p>
+                    <p>Desciption: <input type="text" name="description" value="<?= isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ' ' ?>"/></p>
                     <input type="submit" value="Find by description" />
                 </form>
                 </td>
@@ -163,7 +159,7 @@ addTransaction(13, '2020-01-03', 30, 'Transport', 'Bus');
                         foreach($filtered as $transaction): ?>
                             <p><?php echo "ID: " . $transaction['id'] . " | date: " . $transaction['date'] . " | amount: " . $transaction['amount'] . " | description: " . $transaction['description'] . " | merchant: " . $transaction['merchant']; ?></p>
                         <?php endforeach; 
-                    elseif(count($filtered) == 0 || $desc == ' '):
+                    elseif(count($filtered) == 0):
                         echo "No transactions found";
                     endif;
                     ?>
@@ -181,13 +177,12 @@ addTransaction(13, '2020-01-03', 30, 'Transport', 'Bus');
                     if(isset($_POST['FindById'])):
                         $id = (int)$_POST['FindById'];
                         $transaction = FindById($id);?>
-                        <p id="color">Days since transaction: 
                         <?php 
                         if(empty($transaction)){
                             echo " ";   
-                        }else{
-                            echo " " . DaySinceTransaction($transaction['date']);
-                        }?></p>
+                        } else { ?>
+                            <p id="color">Days since transaction: <?php echo " " . DaySinceTransaction($transaction['date']); ?></p>
+                        <?php } ?>
                     <?php endif; ?>
                     </td>
                 </tr>

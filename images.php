@@ -1,6 +1,5 @@
 <?php 
     $dir = 'images/';
-    //scandir() function returns an array of files and directories in the specified directory.
     $images = scandir($dir);
     ?>
 
